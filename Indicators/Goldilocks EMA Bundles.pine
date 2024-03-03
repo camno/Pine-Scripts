@@ -1,0 +1,44 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © chapmanwonders
+// 21 EMA lines, AKA BGL, are quite useful in spotting the potential trend in advance. 
+// This script uses a bundle of 21 EMA with different timeframes, i.e. using 5 min, 15 min, 30 min, 
+// 1 hour, daily, weekly, and monthly bars to calculate the 21 EMA step-lines. With various timeframes 
+// in a single script, user could take advantage the limit of indicators allowed in the chart.
+// This tool is intended for finding the potential support and resistance areas in various timeframes.
+
+
+//Reference:
+//1. www.investors.com/ho...tial-moving-average/
+//2. www.coursesidekick.com/economics/166131
+
+
+//@version = 5
+indicator("Minutes Triggers", shorttitle = "Triggers", overlay = true)
+
+
+trigger_5 = request.security(syminfo.tickerid, '5', ta.ema(close, 21))
+
+trigger_30 = request.security(syminfo.tickerid, '30', ta.ema(close, 21))
+
+trigger_hour = request.security(syminfo.tickerid, '60', ta.ema(close, 21))
+
+trigger_day = request.security(syminfo.tickerid, 'D', ta.ema(close, 21))
+
+trigger_week = request.security(syminfo.tickerid, 'W', ta.ema(close, 21))
+
+trigger_month = request.security(syminfo.tickerid, 'M', ta.ema(close, 21))
+
+
+
+plot(trigger_5, title = "5 mins trigger", color = color.white, style = plot.style_stepline, linewidth = 2)
+
+plot(trigger_30, title = "30 mins trigger", color = color.yellow, style = plot.style_stepline, linewidth = 2)
+
+plot(trigger_hour, title = "Hourly trigger", color = color.lime, style = plot.style_stepline, linewidth = 2)
+
+plot(trigger_day, title = "Daily trigger", color = color.rgb(68, 121, 70), style = plot.style_stepline, linewidth = 2)
+
+plot(trigger_week, title = "Weekly trigger", color = color.olive, style = plot.style_stepline, linewidth = 2)
+
+plot(trigger_month, title = "Monthly trigger", color = color.gray, style = plot.style_stepline, linewidth = 2)
+
