@@ -1,0 +1,56 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © chapmanwonders
+
+//@version=5
+// initial cash amount 10000, when in trade, it trade all the available cash amount for the ticker
+strategy("BGL", overlay = true, default_qty_value = 10000, default_qty_type = strategy.cash) 
+
+// BGL is defined as a 21-period exponential moving average on a 5-minute timeframe. 
+// It is heralded as an indicator of the current trend in price action. 
+
+// entry_pts: the entry float \times added to the condition 
+entry_pts = input.float(1, "Entry Float")
+
+// exit_pts: the entry float subtracted to the condition 
+exit_pts = input.float(1, "Exit Float")
+
+price = input(close, title = "Close")
+
+period = input.int(21, "EMA Length")
+
+trigger = ta.ema(price, period)
+
+// Check if strategy is flat and track result with variable
+isFlat = strategy.position_size == 0
+
+
+// ======================== long strategy ==============================================================//
+// enter long if previous bar's close crosses above the trigger threshold 
+longCondition = isFlat and (close[1] > trigger[1] + entry_pts / 100) and (open[1] < trigger[1])
+
+if (longCondition)
+    string debugText = "LONG: Open value is " + str.tostring(open[1]) + " ,the close value is " + str.tostring(close[1]) + ", and the trigger is " + str.tostring(trigger[1])
+    label = label.new(bar_index, high, debugText, color = color.green, textcolor = color.white, style = label.style_none, yloc = yloc.abovebar)
+
+    strategy.entry("Enter Long", strategy.long, alert_message = debugText)
+ 
+// ======================== short strategy ==============================================================//    
+// exit the long when the low of previous bar cross below the trigger 
+exitLongCondition = (low[1] < (trigger - exit_pts / 100)) and (open[1] > trigger)
+if (exitLongCondition)
+    strategy.close("Enter Long")
+
+
+
+// enter short if previous bar's close crosses below the trigger threshold
+shortCondition = isFlat and (close[1] < trigger) and (open[1] > trigger) 
+if (shortCondition)
+    string debugText = "SHORT: Open value is " + str.tostring(open[1]) + " ,the close value is " + str.tostring(close[1]) + ", and the trigger is " + str.tostring(trigger)
+    label = label.new(bar_index, high, debugText, color = color.green, textcolor = color.white, style = label.style_none, yloc = yloc.abovebar)
+    strategy.entry("Enter Short", strategy.short, limit = trigger - entry_pts / 100)
+// exit the short when the high of previous bar is above the trigger
+exitShortCondition = (high[1] > (trigger + exit_pts / 100)) and (open[1] < trigger)
+if (exitShortCondition)
+    strategy.close("Enter Short")
+
+plot(trigger, title = "Trigger", style = plot.style_stepline, color = color.green, linewidth = 2)
